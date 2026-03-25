@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="RoomCatalogue" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/room_catalogue.gd" id="1_catalogue"]
+
+[resource]
+script = ExtResource("1_catalogue")
+entrance_rooms = ["res://assets/rooms/entrance/medium_entrance_01.tscn"]
+exit_rooms = ["res://assets/rooms/exit/medium_exit_01.tscn"]
+corridor_rooms = [
+	"res://assets/rooms/corridor/small_straight_01.tscn",
+	"res://assets/rooms/corridor/small_straight_02.tscn"
+]
+chamber_rooms = [
+	"res://assets/rooms/chamber/medium_storage_01.tscn",
+	"res://assets/rooms/chamber/medium_lab_01.tscn"
+]
+hub_rooms = []
+cap_rooms = ["res://assets/rooms/corridor/small_cap_01.tscn"]

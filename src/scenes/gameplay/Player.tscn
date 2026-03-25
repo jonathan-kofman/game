@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/character_controller.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/core/health_component.gd" id="2_health"]
+[ext_resource type="Script" path="res://scripts/tools/tool_manager.gd" id="3_toolmgr"]
+[ext_resource type="Script" path="res://scripts/tools/gravity_flip_tool.gd" id="4_gravity"]
+[ext_resource type="Script" path="res://scripts/tools/time_slow_tool.gd" id="5_timeslow"]
+[ext_resource type="Script" path="res://scripts/tools/force_push_tool.gd" id="6_forcepush"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+height = 1.8
+radius = 0.4
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_player")
+collision_layer = 4
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="CameraMount" type="Node3D" parent="."]
+position = Vector3(0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraMount"]
+
+[node name="RayCast3D" type="RayCast3D" parent="CameraMount/Camera3D"]
+target_position = Vector3(0, 0, -10)
+enabled = true
+collision_mask = 3
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+
+[node name="ToolManager" type="Node" parent="."]
+script = ExtResource("3_toolmgr")
+
+[node name="GravityFlipTool" type="Node" parent="ToolManager"]
+script = ExtResource("4_gravity")
+
+[node name="TimeSlowTool" type="Node" parent="ToolManager"]
+script = ExtResource("5_timeslow")
+
+[node name="ForcePushTool" type="Node" parent="ToolManager"]
+script = ExtResource("6_forcepush")

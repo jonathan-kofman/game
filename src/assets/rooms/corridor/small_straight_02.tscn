@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/room_template.gd" id="1_template"]
+[ext_resource type="Script" path="res://scripts/core/room_connector.gd" id="2_connector"]
+
+[node name="small_straight_02" type="Node3D"]
+script = ExtResource("1_template")
+room_id = "small_straight_02"
+room_type = "corridor"
+size_class = "small"
+aabb_half_extents = Vector3(5.0, 2.0, 2.0)
+tags = ["standard"]
+min_exits = 2
+max_exits = 2
+weight = 2.0
+
+[node name="Connectors" type="Node" parent="."]
+
+[node name="east_a" type="Marker3D" parent="Connectors"]
+script = ExtResource("2_connector")
+position = Vector3(5.0, 1.2, 0.0)
+connector_id = "east_a"
+direction = Vector3(1.0, 0.0, 0.0)
+size = Vector2(2.0, 2.4)
+tags = ["door", "standard"]
+
+[node name="west_a" type="Marker3D" parent="Connectors"]
+script = ExtResource("2_connector")
+position = Vector3(-5.0, 1.2, 0.0)
+connector_id = "west_a"
+direction = Vector3(-1.0, 0.0, 0.0)
+size = Vector2(2.0, 2.4)
+tags = ["door", "standard"]
+
+[node name="SpawnPoints" type="Node" parent="."]
+
+[node name="PlayerSpawn_01" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(0.0, 0.1, 0.0)

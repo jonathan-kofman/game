@@ -1,0 +1,49 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/room_template.gd" id="1_template"]
+[ext_resource type="Script" path="res://scripts/core/room_connector.gd" id="2_connector"]
+
+[node name="medium_storage_01" type="Node3D"]
+script = ExtResource("1_template")
+room_id = "medium_storage_01"
+room_type = "chamber"
+size_class = "medium"
+aabb_half_extents = Vector3(5.0, 2.0, 5.0)
+tags = ["standard"]
+min_exits = 1
+max_exits = 3
+weight = 1.5
+
+[node name="Connectors" type="Node" parent="."]
+
+[node name="north_a" type="Marker3D" parent="Connectors"]
+script = ExtResource("2_connector")
+position = Vector3(0.0, 1.2, -5.0)
+connector_id = "north_a"
+direction = Vector3(0.0, 0.0, -1.0)
+size = Vector2(2.0, 2.4)
+tags = ["door", "standard"]
+
+[node name="south_a" type="Marker3D" parent="Connectors"]
+script = ExtResource("2_connector")
+position = Vector3(0.0, 1.2, 5.0)
+connector_id = "south_a"
+direction = Vector3(0.0, 0.0, 1.0)
+size = Vector2(2.0, 2.4)
+tags = ["door", "standard"]
+
+[node name="east_a" type="Marker3D" parent="Connectors"]
+script = ExtResource("2_connector")
+position = Vector3(5.0, 1.2, 0.0)
+connector_id = "east_a"
+direction = Vector3(1.0, 0.0, 0.0)
+size = Vector2(2.0, 2.4)
+tags = ["door", "standard"]
+
+[node name="SpawnPoints" type="Node" parent="."]
+
+[node name="PlayerSpawn_01" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(0.0, 0.1, 0.0)
+
+[node name="PlayerSpawn_02" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-2.0, 0.1, 2.0)
