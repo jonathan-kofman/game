@@ -2,7 +2,7 @@
 
 > **Status**: Approved
 > **Created**: 2026-03-25
-> **Last Updated**: 2026-03-25 (Sprint 4 — 18 design docs complete)
+> **Last Updated**: 2026-03-26 (Sprint 6 — implementation status added)
 > **Source Concept**: design/gdd/game-concept.md
 
 ---
@@ -24,21 +24,21 @@ be validated early via prototype before the rest of the system stack is committe
 
 | # | System Name | Category | Priority | Status | Design Doc | Depends On |
 |---|-------------|----------|----------|--------|------------|------------|
-| 1 | Input System | Core | MVP | Design Complete | [input-system.md](input-system.md) | — |
+| 1 | Input System | Core | MVP | ✅ Implemented | [input-system.md](input-system.md) | — |
 | 2 | Audio System | Audio | Vertical Slice | Not Started | — | — |
 | 3 | Save/Load System | Persistence | Alpha | Not Started | — | — |
-| 4 | Room Template Data System | Core | MVP | Design Complete | [room-template-data-system.md](room-template-data-system.md) | — |
-| 5 | Networking Layer | Core | MVP | Not Started | — | — |
-| 6 | Character Controller | Core | MVP | Design Complete | [character-controller.md](character-controller.md) | Input System |
-| 7 | Physics Interaction Layer | Core | MVP | Design Complete | [physics-interaction-layer.md](physics-interaction-layer.md) | engine physics |
-| 8 | Physics Tool System | Gameplay | MVP | Design Complete | [physics-tool-system.md](physics-tool-system.md) | Character Controller, Physics Interaction Layer |
-| 9 | Health & Death System | Core | MVP | Design Complete | [health-death-system.md](health-death-system.md) | Character Controller |
-| 10 | Player Spawning & Respawn | Core | MVP | Design Complete | [player-spawning-respawn.md](player-spawning-respawn.md) | Networking Layer, Character Controller |
-| 11 | State Synchronization | Core | MVP | Not Started | — | Networking Layer, all Core systems |
-| 12 | Procedural Generation System | Gameplay | MVP | Design Complete | [procedural-generation-system.md](procedural-generation-system.md) | Room Template Data System |
-| 13 | Objective System | Gameplay | MVP | Design Complete | [objective-system.md](objective-system.md) | Procedural Generation System |
-| 14 | Escalation System | Gameplay | MVP | Design Complete | [escalation-system.md](escalation-system.md) | Objective System |
-| 15 | Extraction System | Gameplay | MVP | Design Complete | [extraction-system.md](extraction-system.md) | Escalation System |
+| 4 | Room Template Data System | Core | MVP | ✅ Implemented | [room-template-data-system.md](room-template-data-system.md) | — |
+| 5 | Networking Layer | Core | MVP | ⏸ Deferred (Vertical Slice) | — | — |
+| 6 | Character Controller | Core | MVP | ✅ Implemented | [character-controller.md](character-controller.md) | Input System |
+| 7 | Physics Interaction Layer | Core | MVP | ✅ Implemented | [physics-interaction-layer.md](physics-interaction-layer.md) | engine physics |
+| 8 | Physics Tool System | Gameplay | MVP | ✅ Implemented | [physics-tool-system.md](physics-tool-system.md) | Character Controller, Physics Interaction Layer |
+| 9 | Health & Death System | Core | MVP | ✅ Implemented | [health-death-system.md](health-death-system.md) | Character Controller |
+| 10 | Player Spawning & Respawn | Core | MVP | 🔶 Partial (spawn ✅, respawn deferred) | [player-spawning-respawn.md](player-spawning-respawn.md) | Networking Layer, Character Controller |
+| 11 | State Synchronization | Core | MVP | ⏸ Deferred (Vertical Slice) | — | Networking Layer, all Core systems |
+| 12 | Procedural Generation System | Gameplay | MVP | ✅ Implemented | [procedural-generation-system.md](procedural-generation-system.md) | Room Template Data System |
+| 13 | Objective System | Gameplay | MVP | ✅ Implemented | [objective-system.md](objective-system.md) | Procedural Generation System |
+| 14 | Escalation System | Gameplay | MVP | ✅ Implemented | [escalation-system.md](escalation-system.md) | Objective System |
+| 15 | Extraction System | Gameplay | MVP | ✅ Implemented | [extraction-system.md](extraction-system.md) | Escalation System |
 | 16 | Enemy & Hazard System | Gameplay | Vertical Slice | Not Started | — | Character Controller, Health & Death System |
 | 17 | Resource & Loot System | Economy | Vertical Slice | Not Started | — | Extraction System |
 | 18 | Base Building System | Gameplay | Alpha | Not Started | — | Resource & Loot System, Physics Interaction Layer |
@@ -47,14 +47,14 @@ be validated early via prototype before the rest of the system stack is committe
 | 21 | Solo/Co-op Scaling System (inferred) | Gameplay | MVP | Design Complete | [solo-coop-scaling-system.md](solo-coop-scaling-system.md) | Networking Layer, Objective System |
 | 22 | Lore Fragment System | Narrative | Alpha | Not Started | — | Room Template Data System |
 | 23 | Environmental Narrative System | Narrative | Alpha | Not Started | — | Room Template Data System, Lore Fragment System |
-| 24 | Mission Debrief System | Gameplay | MVP | Design Complete | [mission-debrief-system.md](mission-debrief-system.md) | Objective System, Resource & Loot System |
+| 24 | Mission Debrief System | Gameplay | MVP | ✅ Implemented | [mission-debrief-system.md](mission-debrief-system.md) | Objective System, Resource & Loot System |
 | 25 | Camera System | Core | Vertical Slice | Not Started | — | Character Controller |
-| 26 | Tool Selection UI | UI | MVP | Design Complete | [tool-selection-ui.md](tool-selection-ui.md) | Physics Tool System |
-| 27 | HUD | UI | MVP | Design Complete | [hud.md](hud.md) | Health & Death System, Objective System, Escalation System |
+| 26 | Tool Selection UI | UI | MVP | ✅ Implemented | [tool-selection-ui.md](tool-selection-ui.md) | Physics Tool System |
+| 27 | HUD | UI | MVP | ✅ Implemented | [hud.md](hud.md) | Health & Death System, Objective System, Escalation System |
 | 28 | Base Building UI | UI | Alpha | Not Started | — | Base Building System |
 | 29 | Codex/Journal UI | UI | Alpha | Not Started | — | Lore Fragment System |
 | 30 | Lobby/Session UI | UI | Vertical Slice | Not Started | — | Networking Layer |
-| 31 | Mission Debrief UI | UI | MVP | Design Complete | [mission-debrief-ui.md](mission-debrief-ui.md) | Mission Debrief System |
+| 31 | Mission Debrief UI | UI | MVP | ✅ Implemented | [mission-debrief-ui.md](mission-debrief-ui.md) | Mission Debrief System |
 | 32 | Main Menu & UI Flow | UI | Alpha | Not Started | — | Save/Load System |
 | 33 | Visual Effects & Juice System | Meta | Vertical Slice | Not Started | — | Physics Tool System, Audio System |
 | 34 | Performance & LOD System | Meta | Full Vision | Not Started | — | Procedural Generation System |
@@ -216,6 +216,7 @@ be validated early via prototype before the rest of the system stack is committe
 | Design docs reviewed | 0 |
 | Design docs approved | 18 |
 | MVP systems designed | 14 / 16 |
+| MVP systems implemented | 13 / 16 (deferred: Networking Layer, State Sync, Solo/Co-op Scaling) |
 | Vertical Slice systems designed | 0 / 7 |
 | Alpha systems designed | 0 / 9 |
 | Full Vision systems designed | 0 / 4 |

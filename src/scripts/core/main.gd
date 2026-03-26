@@ -152,6 +152,29 @@ func _setup_facility() -> void:
 			health_comp.health_changed.connect(hud.on_health_changed)
 			hud.on_health_changed(health_comp.current_hp, health_comp.max_hp)
 
+	# ── Tool Selection UI ─────────────────────────────────────────────────────
+	# Instantiated after player so ToolManager nodes exist before connecting.
+
+	var tool_ui_packed := load("res://scenes/ui/ToolSelectionUI.tscn") as PackedScene
+	if tool_ui_packed != null:
+		var tool_ui := tool_ui_packed.instantiate() as ToolSelectionUI
+		add_child(tool_ui)
+		if player != null:
+			var tool_mgr := player.get_node_or_null("ToolManager") as ToolManager
+			if tool_mgr != null:
+				for tool_node in [
+					tool_mgr.get_node_or_null("GravityFlipTool"),
+					tool_mgr.get_node_or_null("TimeSlowTool"),
+					tool_mgr.get_node_or_null("ForcePushTool"),
+				]:
+					if tool_node is BaseTool:
+						var bt := tool_node as BaseTool
+						bt.tool_activated.connect(tool_ui.on_tool_activated)
+						bt.tool_deactivated.connect(tool_ui.on_tool_deactivated)
+						bt.tool_failed.connect(tool_ui.on_tool_failed)
+	else:
+		push_error("Main: could not load ToolSelectionUI.tscn")
+
 	generator.queue_free()
 
 # ── Debrief ────────────────────────────────────────────────────────────────────
