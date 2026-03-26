@@ -89,6 +89,14 @@ func _setup_facility() -> void:
 					entrance_spawn_pos = world_transform * spawns[0].position
 					entrance_spawn_pos.y += 0.1  # lift slightly above floor
 
+	# ── HUD ───────────────────────────────────────────────────────────────────
+	# Must be created before gameplay managers so it is connected before their
+	# first signals fire (especially ObjectiveManager.setup() which emits immediately).
+
+	var hud_packed := load("res://scenes/ui/HUD.tscn") as PackedScene
+	var hud: HUD = hud_packed.instantiate() as HUD
+	add_child(hud)
+
 	# ── Mission loop setup ────────────────────────────────────────────────────
 
 	# Escalation Manager
@@ -99,22 +107,21 @@ func _setup_facility() -> void:
 	# Extraction Zone — placed at exit room's extraction_zone spawn point
 	var extraction := _setup_extraction_zone(graph, room_nodes)
 
-	# Objective Manager — places terminals, connects to escalation + extraction
+	# Objective Manager — wire HUD BEFORE calling setup() (setup emits signals)
 	var objectives := ObjectiveManager.new()
 	objectives.name = "ObjectiveManager"
 	add_child(objectives)
-	objectives.setup(graph, room_nodes)
 
-	# Wire: objective complete → escalation advance + extraction unlock
+	# Wire HUD to gameplay signals before any signal fires
+	escalation.escalation_level_changed.connect(hud.on_escalation_changed)
+	objectives.objective_state_changed.connect(hud.on_objective_state_changed)
+
+	# Wire gameplay → gameplay
 	objectives.primary_objective_complete.connect(escalation.on_objective_completed)
 	if extraction != null:
 		objectives.primary_objective_complete.connect(extraction.unlock)
 
-	# Wire: escalation critical → log (HUD will consume in future sprint)
-	escalation.escalation_level_changed.connect(func(level: int, name_str: String) -> void:
-		print("[Main] Escalation: %s" % name_str))
-
-	# Wire: run outcome signals
+	# Wire run outcome signals
 	if extraction != null:
 		extraction.run_succeeded.connect(func() -> void:
 			print("[Main] === RUN SUCCEEDED ==="))
@@ -122,6 +129,9 @@ func _setup_facility() -> void:
 			print("[Main] === RUN PARTIAL SUCCESS (%d/%d extracted) ===" % [ext, total]))
 		extraction.run_failed.connect(func() -> void:
 			print("[Main] === RUN FAILED ==="))
+
+	# setup() emits objective_state_changed — HUD is already connected above
+	objectives.setup(graph, room_nodes)
 
 	escalation.start()
 
@@ -131,7 +141,15 @@ func _setup_facility() -> void:
 		if graph.entrance_index >= 0 else Transform3D.IDENTITY
 	_spawn_physics_objects(entrance_transform.origin)
 
-	_spawn_player(entrance_spawn_pos)
+	var player := _spawn_player(entrance_spawn_pos)
+	if player != null:
+		# Wire HealthComponent → HUD. String path is acceptable in scene orchestration.
+		var health_comp := player.get_node("HealthComponent") as HealthComponent
+		if health_comp != null:
+			health_comp.health_changed.connect(hud.on_health_changed)
+			# Initialise HUD to current health (no damage taken yet, but sets bar state)
+			hud.on_health_changed(health_comp.current_hp, health_comp.max_hp)
+
 	generator.queue_free()
 
 func _setup_extraction_zone(graph: FacilityGraph, room_nodes: Array) -> ExtractionZone:
@@ -212,14 +230,16 @@ func _spawn_physics_objects(near_pos: Vector3) -> void:
 	_add_physics_sphere(near_pos + Vector3( 1.0, 0.4,  1.5), Color(1.0, 1.0, 1.0))
 	_add_physics_sphere(near_pos + Vector3(-1.0, 0.4, -1.5), Color(0.9, 0.5, 0.1))
 
-func _spawn_player(spawn_pos: Vector3) -> void:
+## Spawns the player at spawn_pos and returns the node for signal wiring.
+func _spawn_player(spawn_pos: Vector3) -> CharacterController:
 	var player_scene := load("res://scenes/gameplay/Player.tscn") as PackedScene
 	if player_scene == null:
 		push_error("Main: could not load Player.tscn")
-		return
-	var player := player_scene.instantiate()
+		return null
+	var player := player_scene.instantiate() as CharacterController
 	player.position = spawn_pos
 	add_child(player)
+	return player
 
 # ── Static Helpers ─────────────────────────────────────────────────────────────
 
