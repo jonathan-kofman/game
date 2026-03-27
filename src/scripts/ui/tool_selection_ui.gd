@@ -192,7 +192,7 @@ func _build_ui() -> void:
 	hbox.add_theme_constant_override("separation", slot_spacing)
 	vbox.add_child(hbox)
 
-	for i in 3:
+	for i in _TOOL_NAMES.size():
 		var panel := PanelContainer.new()
 		panel.custom_minimum_size = Vector2(slot_width, slot_height)
 

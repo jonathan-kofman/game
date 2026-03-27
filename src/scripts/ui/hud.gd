@@ -54,8 +54,8 @@ func on_health_changed(new_hp: int, max_hp: int) -> void:
 
 ## Wire to EscalationManager.escalation_level_changed(new_level, level_name).
 func on_escalation_changed(new_level: int, level_name: String) -> void:
-	const TOTAL_LEVELS := 4
-	_escalation_bar.value = float(new_level + 1) / float(TOTAL_LEVELS + 1) * 100.0
+	const TOTAL_LEVELS := 4  # levels 0–3; bar is 0% at CALM, 100% at CRITICAL
+	_escalation_bar.value = float(new_level) / float(TOTAL_LEVELS - 1) * 100.0
 
 	_esc_color = _ESCALATION_COLORS[clampi(new_level, 0, _ESCALATION_COLORS.size() - 1)]
 	_escalation_bar.modulate  = _esc_color

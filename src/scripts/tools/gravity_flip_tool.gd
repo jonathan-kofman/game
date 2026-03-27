@@ -21,6 +21,10 @@ func activate(target: Node, _normal: Vector3) -> void:
 
 	if obj == _flipped_object:
 		# Toggle off — restore the same object
+		if not is_instance_valid(obj):
+			_flipped_object = null
+			is_active = false
+			return
 		obj.restore_gravity()
 		_flipped_object = null
 		is_active = false

@@ -185,7 +185,7 @@ func _trigger_debrief(outcome: String) -> void:
 	print("[Main] === RUN %s ===" % outcome)
 
 	# Build objectives list from ObjectiveManager state
-	var objectives_list: Array = []
+	var objectives_list: Array[Dictionary] = []
 	if _objectives != null and _objectives.primary_objective != null:
 		objectives_list.append({
 			"name":        "Activate Terminal",

@@ -39,7 +39,7 @@ func deactivate() -> void:
 # ── Private ───────────────────────────────────────────────────────────────────
 
 func _begin_time_slow() -> void:
-	var player := get_parent().get_parent()  # ToolManager -> Player
+	var player := get_parent().get_parent() as Node3D  # ToolManager -> Player
 	if player == null:
 		_fail("could not find player node")
 		return
@@ -68,7 +68,7 @@ func _begin_time_slow() -> void:
 			obj.apply_time_slow(time_slow_factor, high_damp_value)
 
 	is_active = true
-	tool_activated.emit(name, null)
+	tool_activated.emit(name, null)  # AoE tool — no single target; subscribers must guard null
 	print("[TimeSlowTool] slowing %d objects" % _slowed_objects.size())
 
 func _end_time_slow() -> void:

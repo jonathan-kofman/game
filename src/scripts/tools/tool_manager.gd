@@ -28,7 +28,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if ray == null:
 		return
 
-	var target := ray.get_collider()
+	var target := ray.get_collider() as Node
 	var normal := ray.get_collision_normal()
 
 	# Gravity Flip — press to toggle

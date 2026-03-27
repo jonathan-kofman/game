@@ -55,7 +55,7 @@ func _ready() -> void:
 ## outcome:    "SUCCEEDED", "PARTIAL_SUCCESS", or "FAILED"
 ## objectives: Array of Dictionaries — {"name": String, "is_complete": bool}
 ## xp_earned:  Total XP for this run (clamped to >= 0 internally)
-func show_debrief(outcome: String, objectives: Array, xp_earned: int) -> void:
+func show_debrief(outcome: String, objectives: Array[Dictionary], xp_earned: int) -> void:
 	_xp_target   = max(xp_earned, 0)
 	_xp_elapsed  = 0.0
 	_anim_done   = false

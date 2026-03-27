@@ -44,11 +44,14 @@ func restore_gravity() -> void:
 
 ## Apply time slow effect. Scales gravity down, applies drag to bleed momentum.
 ## Wakes sleeping bodies via gravity_scale change (Jolt activation path).
+## Preserves active gravity flip: if flipped, slow factor is applied to the
+## negative gravity_scale so the object still rises, just more slowly.
 ## Called by TimeSlowTool only.
 func apply_time_slow(slow_factor: float, damp_value: float) -> void:
 	is_time_slowed = true
 	sleeping = false
-	gravity_scale = original_gravity_scale * slow_factor
+	var base_scale := -abs(original_gravity_scale) if is_gravity_flipped else original_gravity_scale
+	gravity_scale = base_scale * slow_factor
 	linear_damp = damp_value
 	physics_state_changed.emit(self)
 
