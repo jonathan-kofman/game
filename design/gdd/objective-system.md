@@ -71,6 +71,17 @@ INACTIVE → ACTIVE → COMPLETE
                   → FAILED (Survive type only, or run ends)
 ```
 
+### 3.6 Emitted Signals
+
+| Signal | Parameters | When fired |
+|--------|------------|------------|
+| `objective_state_changed` | `objective_id: String, new_state: String` | On every state transition. `new_state` is one of `"ACTIVE"`, `"COMPLETE"`, `"FAILED"`. |
+| `primary_objective_complete` | *(none)* | When the primary objective reaches COMPLETE. |
+
+> **Implementation note**: `new_state` is a plain string (`"ACTIVE"`, `"COMPLETE"`, `"FAILED"`),
+> not an ObjectiveData dictionary. HUD and other subscribers receive the string directly.
+> Richer data (objective name, progress count) is deferred until a richer UI is needed.
+
 ---
 
 ## 4. Formulas

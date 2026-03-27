@@ -95,3 +95,23 @@ func test_non_physics_object_emits_tool_failed() -> void:
 	_tool.activate(plain_node, Vector3.ZERO)
 	assert_signal_emitted(_tool, "tool_failed")
 	plain_node.queue_free()
+
+# ── Regression: freed-object guard (bug fix 2026-03-27) ──────────────────────
+
+func test_toggle_off_freed_object_does_not_crash() -> void:
+	# Arrange: flip obj_a, then free it without toggling off
+	_tool.activate(_obj_a, Vector3.ZERO)
+	_obj_a.queue_free()
+	await get_tree().process_frame  # let queue_free execute
+
+	# Act: pressing G again should handle the freed reference gracefully
+	# Create a fresh stub to aim at so activate() gets a non-null target
+	var obj_new := PhysicsObjectStub.new()
+	add_child(obj_new)
+
+	# Point at the new object — tool should not crash on the stale _flipped_object
+	_tool.activate(obj_new, Vector3.ZERO)
+
+	# Assert: new object is now flipped, no crash
+	assert_true(obj_new.flip_called, "Should flip the new object after handling freed reference")
+	obj_new.queue_free()

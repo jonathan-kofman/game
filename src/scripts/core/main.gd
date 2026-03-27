@@ -152,6 +152,19 @@ func _setup_facility() -> void:
 			health_comp.health_changed.connect(hud.on_health_changed)
 			hud.on_health_changed(health_comp.current_hp, health_comp.max_hp)
 
+		# ── Camera Controller ─────────────────────────────────────────────────
+		var cam_ctrl := player.get_node_or_null("CameraMount/CameraController") as CameraController
+		if cam_ctrl != null:
+			cam_ctrl.connect_to_player(player as CharacterController)
+			var tool_mgr_for_cam := player.get_node_or_null("ToolManager") as ToolManager
+			if tool_mgr_for_cam != null:
+				var cam_tools: Array[BaseTool] = []
+				for tn in ["GravityFlipTool", "TimeSlowTool", "ForcePushTool"]:
+					var t := tool_mgr_for_cam.get_node_or_null(tn) as BaseTool
+					if t != null:
+						cam_tools.append(t)
+				cam_ctrl.connect_to_tools(cam_tools)
+
 	# ── Tool Selection UI ─────────────────────────────────────────────────────
 	# Instantiated after player so ToolManager nodes exist before connecting.
 

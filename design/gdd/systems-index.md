@@ -25,7 +25,7 @@ be validated early via prototype before the rest of the system stack is committe
 | # | System Name | Category | Priority | Status | Design Doc | Depends On |
 |---|-------------|----------|----------|--------|------------|------------|
 | 1 | Input System | Core | MVP | ✅ Implemented | [input-system.md](input-system.md) | — |
-| 2 | Audio System | Audio | Vertical Slice | Not Started | — | — |
+| 2 | Audio System | Audio | Vertical Slice | Design Complete | [audio-system.md](audio-system.md) | Physics Tool System, Escalation System, Health & Death System, Objective System, Extraction System |
 | 3 | Save/Load System | Persistence | Alpha | Not Started | — | — |
 | 4 | Room Template Data System | Core | MVP | ✅ Implemented | [room-template-data-system.md](room-template-data-system.md) | — |
 | 5 | Networking Layer | Core | MVP | ⏸ Deferred (Vertical Slice) | — | — |
@@ -217,7 +217,7 @@ be validated early via prototype before the rest of the system stack is committe
 | Design docs approved | 18 |
 | MVP systems designed | 14 / 16 |
 | MVP systems implemented | 13 / 16 (deferred: Networking Layer, State Sync, Solo/Co-op Scaling) |
-| Vertical Slice systems designed | 0 / 7 |
+| Vertical Slice systems designed | 1 / 7 |
 | Alpha systems designed | 0 / 9 |
 | Full Vision systems designed | 0 / 4 |
 
