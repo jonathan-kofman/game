@@ -1,84 +1,72 @@
-# Sprint 5 — 2026-03-28 to 2026-04-10
+# Sprint 5 — 2026-03-26 to 2026-04-08
 
 ## Sprint Goal
 
-Implement the Physics Tool System in production: BaseTool architecture, all three
-tools (Gravity Flip, Force Push, Time Slow) wired into the existing CharacterController
-and mission loop. The MVP milestone exit criteria "all 3 physics tools work in the
-production codebase" is met by end of sprint.
+All three physics tools exist in the production codebase, Health & Death is
+implemented, and the HUD + Mission Debrief UI are wired — completing every
+remaining implementation requirement for Milestone 1 MVP.
 
 ## Capacity
 
 - Team: 1 person
-- Total days: 10 working days × 1 person = 10 person-days
-- Buffer (20%): 2 days
+- Total days: 10 working days
+- Buffer (20%): 2 days reserved for unplanned work
 - Available: **8 person-days**
 
 ## Tasks
 
 ### Must Have (Critical Path)
 
-| ID | Task | Owner | Est. Days | Dependencies | Acceptance Criteria |
-|----|------|-------|-----------|--------------|---------------------|
-| S5-01 | Implement: PhysicsObject script | Solo dev | 0.5 | Physics Interaction Layer GDD | `scripts/tools/physics_object.gd` — `is_gravity_flipped`, `original_gravity_scale`, `wake()`, `set_time_scale()` API; attach to RigidBody3D layer 2 |
-| S5-02 | Implement: BaseTool base class | Solo dev | 0.5 | S5-01 | `scripts/tools/base_tool.gd` — `activate()`, `deactivate()`, `is_active`, signals: `tool_activated`, `tool_deactivated`, `tool_failed` |
-| S5-03 | Implement: GravityFlipTool | Solo dev | 1.0 | S5-02 | Toggle single object gravity via PhysicsObject API; one object per player at a time; `tool_activated` signal fires with target |
-| S5-04 | Implement: ForcePushTool | Solo dev | 1.0 | S5-02 | Instantaneous impulse via PhysicsObject; tuned to 8–12N (not 18N prototype); `tool_activated` signal fires |
-| S5-05 | Implement: TimeSlowTool | Solo dev | 1.5 | S5-02 | Sphere overlap detection; `wake()` all bodies before slowing; per-body gravity+drag scaling (not velocity snapshot); `tool_activated` / `tool_deactivated` signals |
-| S5-06 | Implement: ToolManager + wire to CharacterController | Solo dev | 1.0 | S5-03, S5-04, S5-05 | `ToolManager` node routes `tool_gravity`/`tool_push`/`tool_slow` input actions to correct tool via `CharacterController.get_aim_ray()`; all three tools activatable in the running game |
-| S5-07 | Build ramp test scene + validate Time Slow | Solo dev | 0.5 | S5-05 | Test room with ramp-dropped objects; Time Slow visibly slows moving RigidBody3Ds; R-07 risk resolved |
+| ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
+|----|------|-------------|-----------|--------------|---------------------|
+| S5-01 | Implement: BaseTool interface + ToolManager | gameplay-programmer | 1.0 | physics-tool-system.md, CONCEPT.md | `BaseTool` class with `activate()`, `deactivate()`, `can_activate()` interface; `ToolManager` coordinates switching and holds active tool reference; tools load as child nodes |
+| S5-02 | Implement: GravityFlip tool (production) | gameplay-programmer | 1.0 | S5-01 | Toggles `gravity_scale` on targeted `RigidBody3D`; restores on second activation; color tint visual indicator on affected objects; audio feedback slot (no audio asset required); works with Jolt |
+| S5-03 | Implement: ForcePush tool (production) | gameplay-programmer | 0.5 | S5-01 | `apply_central_impulse` in collision normal direction; impulse configurable (default 10N); VFX placeholder; audio slot |
+| S5-04 | Implement: Health & Death System | gameplay-programmer | 1.0 | health-death-system.md | `HealthComponent` node; configurable `max_health`; `take_damage(amount)` method; `health_changed(current, max)` signal; `died` signal; no respawn logic required this sprint |
+| S5-05 | Implement: HUD (minimal) | ui-programmer | 1.0 | hud.md, S5-04, escalation_manager.gd | Displays health bar (wired to HealthComponent), escalation level indicator (wired to EscalationManager), objective status text (wired to ObjectiveManager); visible during gameplay |
 
 ### Should Have
 
-| ID | Task | Owner | Est. Days | Dependencies | Acceptance Criteria |
-|----|------|-------|-----------|--------------|---------------------|
-| S5-08 | Implement: Health & Death System | Solo dev | 1.0 | Health & Death System GDD | `health_component.gd` with `take_damage()`, `heal()`, `died` signal; attached to CharacterController; respawn scaffolding stubbed |
-| S5-09 | Reverse-document physics-tools prototype | Solo dev | 0.5 | REPORT.md | `prototypes/physics-tools/CONCEPT.md` written; startup doc gap warning resolved |
+| ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
+|----|------|-------------|-----------|--------------|---------------------|
+| S5-06 | Time Slow retest (moving objects scenario) | gameplay-programmer | 0.5 | CONCEPT.md, R-07 | Run prototype with ramp-spawned moving objects; document whether velocity scaling is viable or requires redesign; update CONCEPT.md follow-up checklist |
+| S5-07 | Implement: TimeSlow tool (production) | gameplay-programmer | 1.0 | S5-01, S5-06 | AoE slow works visibly on moving objects; Jolt sleeping bodies are woken before slowing; configurable radius + factor; togglable |
+| S5-08 | Implement: Mission Debrief UI (minimal) | ui-programmer | 0.5 | mission-debrief-ui.md | Post-run screen triggered by `run_succeeded` / `run_failed` signals; shows outcome label, objective summary, time elapsed; returns to main menu or restarts run |
 
 ### Nice to Have
 
-| ID | Task | Owner | Est. Days | Dependencies | Acceptance Criteria |
-|----|------|-------|-----------|--------------|---------------------|
-| S5-10 | Performance baseline: 10+ physics objects at 60fps | Solo dev | 0.5 | S5-06 | Godot profiler screenshot logged; milestone exit criterion validated; frame time noted in session state |
-| S5-11 | Write GDD: Networking Layer | Solo dev | 0.5 | Solo/Co-op Scaling GDD | All 8 sections; last MVP design gap |
+| ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
+|----|------|-------------|-----------|--------------|---------------------|
+| S5-09 | Performance baseline: 60fps with 10+ physics objects | gameplay-programmer | 0.5 | S5-02, S5-03 | Measure frame time in a scene with 10+ active RigidBody3Ds and tools active; document result in `docs/`; flag if over 16.6ms budget |
+| S5-10 | Design review: physics-tool-system.md | lead-programmer | 0.5 | physics-tool-system.md | `/design-review` passes all 8 sections; CONCEPT.md findings incorporated (force push tuning, time slow caveat) |
 
-## Carryover from Previous Sprint
+## Carryover from Sprint 4
 
 | Task | Reason | New Estimate |
 |------|--------|-------------|
-| Physics-tools prototype documentation | Not blocked — skipped, flagged at startup | 0.5 days (S5-09) |
+| Physics tools regression check | Sprint 4 DoD item left open — prototype tools unverified after mission loop wiring | Superseded by S5-01–S5-03 (full production rewrite) |
 
 ## Risks
 
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|------------|
-| Time Slow rearchitecture (wake + drag scaling) is harder than estimated | MEDIUM | HIGH | Timebox S5-05 at 1.5 days; if blocked, ship a clearly-flagged stub and retest in Sprint 6 with moving objects |
-| Jolt Physics API differences from GDScript docs (knowledge gap) | MEDIUM | MEDIUM | Cross-reference `docs/engine-reference/godot/` before any physics API call; use WebSearch on blockers |
-| PhysicsObject API contract too rigid, tools need to break it | LOW | MEDIUM | Tools may call `wake()` + `apply_central_impulse()` via cast to RigidBody3D if PhysicsObject API proves insufficient — log as tech debt |
+| Time Slow retest (S5-06) finds velocity scaling fundamentally broken | LOW | MEDIUM | CONCEPT.md already flags fallback approach (per-body drag/gravity scaling); S5-07 deferred until S5-06 result known |
+| Health & Death scope expands (death animation, respawn UX) | MEDIUM | LOW | Cap at signal level only this sprint — no visual death, no respawn; both are Vertical Slice scope |
+| HUD surfaces missing signal connections in existing systems | LOW | LOW | All systems emit standard signals per GDDs; HUD only reads, never writes |
+| BaseTool interface design wrong on first pass | MEDIUM | MEDIUM | Design interface before writing tool implementations; consider `/architecture-decision` ADR |
 
 ## Dependencies on External Factors
 
-- Godot 4.6.1 Jolt Physics behavior — cross-reference VERSION.md before physics API usage
+- `physics-tool-system.md` GDD should be reviewed before S5-01 starts (or in parallel)
+- Jolt Physics 4.6.1 sleeping body behavior (R-07) — testable locally, no external dependency
 
 ## Definition of Done for Sprint 5
 
-- [ ] S5-01 through S5-06 (all Must Haves) complete
-- [ ] All three tools activatable in the running game via keyboard
-- [ ] Time Slow visibly works on moving objects (ramp test — R-07 resolved)
-- [ ] `systems-index.md` updated: Physics Tool System → Implementation Complete
-- [ ] Prototype documentation gap resolved (S5-09)
-- [ ] No regressions: mission loop (terminal → escalation → extraction) still closes
-
-## Completed Tasks
-
-| ID | Task | Completed | Notes |
-|----|------|-----------|-------|
-| S5-01 | Implement: PhysicsObject script | 2026-03-27 | `src/scripts/core/physics_object.gd` — full API: flip_gravity, restore_gravity, apply_time_slow, remove_time_slow, apply_push, physics_state_changed signal |
-| S5-02 | Implement: BaseTool base class | 2026-03-27 | `src/scripts/tools/base_tool.gd` — activate(), deactivate(), is_active, tool_activated/deactivated/failed signals, get_physics_object() helper |
-| S5-03 | Implement: GravityFlipTool | 2026-03-27 | `src/scripts/tools/gravity_flip_tool.gd` — toggle single object, one flip per player, auto-restores previous on re-target |
-| S5-04 | Implement: ForcePushTool | 2026-03-27 | `src/scripts/tools/force_push_tool.gd` — 12N default (down from 18N prototype), collision normal push direction |
-| S5-05 | Implement: TimeSlowTool | 2026-03-27 | `src/scripts/tools/time_slow_tool.gd` — gravity/damp scaling (Jolt-safe), wakes sleeping bodies, sphere overlap query layer 2 |
-| S5-06 | Implement: ToolManager + wire to CharacterController | 2026-03-27 | `src/scripts/tools/tool_manager.gd` + `src/scenes/gameplay/Player.tscn` — all 3 tools wired, input actions registered in project.godot |
-| S5-07 | Build ramp test scene + validate Time Slow | 2026-03-27 | `src/scenes/gameplay/RampTestRoom.tscn` + `src/scripts/gameplay/ramp_test_room.gd` — 5 boxes + 2 spheres on 31° ramp; open in Godot to validate |
-| S5-08 | Implement: Health & Death System | 2026-03-27 | `src/scripts/core/health_component.gd` — take_damage, heal, kill, died signal, fall damage via CharacterController.landed; wired in Player.tscn |
-| S5-09 | Reverse-document physics-tools prototype | 2026-03-27 | `prototypes/physics-tools/CONCEPT.md` written; startup doc gap resolved |
+- [ ] S5-01 through S5-05 (all Must Haves) complete
+- [ ] All 3 physics tools callable from the production player scene (F5 → tools work)
+- [ ] HealthComponent attached to player; escalation damage wires to it
+- [ ] HUD visible and updating during a run
+- [ ] Mission Debrief screen shown on run end (if S5-08 complete)
+- [ ] No S1 or S2 bugs in the critical path (move → use tool → objective → extract)
+- [ ] Design documents updated for any deviations from GDD
+- [ ] `design/gdd/systems-index.md` progress tracker updated

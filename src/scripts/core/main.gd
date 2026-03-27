@@ -12,6 +12,16 @@ const WALL_THICKNESS: float = 0.3
 const FLOOR_COLOR: Color = Color(0.35, 0.35, 0.38)
 const WALL_COLOR: Color = Color(0.45, 0.45, 0.50)
 
+# ── XP formula knobs (Mission Debrief System GDD §4.1) ────────────────────────
+
+const _BASE_XP_ACTIVATE    := 80    # base XP for Activate objective type
+const _SOLO_DIFFICULTY_MOD := 0.8   # solo difficulty_multiplier
+const _OUTCOME_XP_MULT     := {"SUCCEEDED": 1.0, "PARTIAL_SUCCESS": 0.75, "FAILED": 0.25}
+
+# ── Runtime references (set during _setup_facility, used by _trigger_debrief) ─
+
+var _objectives: ObjectiveManager = null
+
 # ── Lifecycle ──────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
@@ -77,52 +87,56 @@ func _setup_facility() -> void:
 		add_child(room_node)
 		room_nodes.append(room_node)
 
-		# Build placeholder floor and walls from the template's AABB metadata
 		if room_node is RoomTemplate:
 			var template := room_node as RoomTemplate
 			_build_room_geometry(template, world_transform)
 
-			# Grab entrance player spawn position
 			if i == graph.entrance_index:
 				var spawns := template.get_spawn_points("player")
 				if not spawns.is_empty():
 					entrance_spawn_pos = world_transform * spawns[0].position
-					entrance_spawn_pos.y += 0.1  # lift slightly above floor
+					entrance_spawn_pos.y += 0.1
+
+	# ── HUD ───────────────────────────────────────────────────────────────────
+	# Created before managers so it is connected before their first signals fire.
+
+	var hud_packed := load("res://scenes/ui/HUD.tscn") as PackedScene
+	var hud: HUD = hud_packed.instantiate() as HUD
+	add_child(hud)
 
 	# ── Mission loop setup ────────────────────────────────────────────────────
 
-	# Escalation Manager
 	var escalation := EscalationManager.new()
 	escalation.name = "EscalationManager"
 	add_child(escalation)
 
-	# Extraction Zone — placed at exit room's extraction_zone spawn point
 	var extraction := _setup_extraction_zone(graph, room_nodes)
 
-	# Objective Manager — places terminals, connects to escalation + extraction
 	var objectives := ObjectiveManager.new()
 	objectives.name = "ObjectiveManager"
 	add_child(objectives)
-	objectives.setup(graph, room_nodes)
+	_objectives = objectives  # store for use in _trigger_debrief
 
-	# Wire: objective complete → escalation advance + extraction unlock
+	# Wire HUD before any signal fires
+	escalation.escalation_level_changed.connect(hud.on_escalation_changed)
+	objectives.objective_state_changed.connect(hud.on_objective_state_changed)
+
+	# Wire gameplay → gameplay
 	objectives.primary_objective_complete.connect(escalation.on_objective_completed)
 	if extraction != null:
 		objectives.primary_objective_complete.connect(extraction.unlock)
 
-	# Wire: escalation critical → log (HUD will consume in future sprint)
-	escalation.escalation_level_changed.connect(func(level: int, name_str: String) -> void:
-		print("[Main] Escalation: %s" % name_str))
-
-	# Wire: run outcome signals
+	# Wire run outcomes → debrief
 	if extraction != null:
 		extraction.run_succeeded.connect(func() -> void:
-			print("[Main] === RUN SUCCEEDED ==="))
-		extraction.run_partial_success.connect(func(ext: int, total: int) -> void:
-			print("[Main] === RUN PARTIAL SUCCESS (%d/%d extracted) ===" % [ext, total]))
+			_trigger_debrief("SUCCEEDED"))
+		extraction.run_partial_success.connect(func(_ext: int, _total: int) -> void:
+			_trigger_debrief("PARTIAL_SUCCESS"))
 		extraction.run_failed.connect(func() -> void:
-			print("[Main] === RUN FAILED ==="))
+			_trigger_debrief("FAILED"))
 
+	# setup() emits objective_state_changed — HUD already connected above
+	objectives.setup(graph, room_nodes)
 	escalation.start()
 
 	# ── Physics test objects + player ────────────────────────────────────────
@@ -131,8 +145,65 @@ func _setup_facility() -> void:
 		if graph.entrance_index >= 0 else Transform3D.IDENTITY
 	_spawn_physics_objects(entrance_transform.origin)
 
-	_spawn_player(entrance_spawn_pos)
+	var player := _spawn_player(entrance_spawn_pos)
+	if player != null:
+		var health_comp := player.get_node("HealthComponent") as HealthComponent
+		if health_comp != null:
+			health_comp.health_changed.connect(hud.on_health_changed)
+			hud.on_health_changed(health_comp.current_hp, health_comp.max_hp)
+
+	# ── Tool Selection UI ─────────────────────────────────────────────────────
+	# Instantiated after player so ToolManager nodes exist before connecting.
+
+	var tool_ui_packed := load("res://scenes/ui/ToolSelectionUI.tscn") as PackedScene
+	if tool_ui_packed != null:
+		var tool_ui := tool_ui_packed.instantiate() as ToolSelectionUI
+		add_child(tool_ui)
+		if player != null:
+			var tool_mgr := player.get_node_or_null("ToolManager") as ToolManager
+			if tool_mgr != null:
+				for tool_node in [
+					tool_mgr.get_node_or_null("GravityFlipTool"),
+					tool_mgr.get_node_or_null("TimeSlowTool"),
+					tool_mgr.get_node_or_null("ForcePushTool"),
+				]:
+					if tool_node is BaseTool:
+						var bt := tool_node as BaseTool
+						bt.tool_activated.connect(tool_ui.on_tool_activated)
+						bt.tool_deactivated.connect(tool_ui.on_tool_deactivated)
+						bt.tool_failed.connect(tool_ui.on_tool_failed)
+	else:
+		push_error("Main: could not load ToolSelectionUI.tscn")
+
 	generator.queue_free()
+
+# ── Debrief ────────────────────────────────────────────────────────────────────
+
+## Computes XP and objective list, then shows the MissionDebriefUI.
+## outcome: "SUCCEEDED", "PARTIAL_SUCCESS", or "FAILED"
+func _trigger_debrief(outcome: String) -> void:
+	print("[Main] === RUN %s ===" % outcome)
+
+	# Build objectives list from ObjectiveManager state
+	var objectives_list: Array = []
+	if _objectives != null and _objectives.primary_objective != null:
+		objectives_list.append({
+			"name":        "Activate Terminal",
+			"is_complete": _objectives.primary_objective.is_complete(),
+		})
+
+	# XP formula: base_xp[Activate] × outcome_multiplier × solo_difficulty
+	var outcome_mult: float = _OUTCOME_XP_MULT.get(outcome, 0.25)
+	var xp_earned := int(_BASE_XP_ACTIVATE * outcome_mult * _SOLO_DIFFICULTY_MOD)
+
+	var debrief_packed := load("res://scenes/ui/MissionDebriefUI.tscn") as PackedScene
+	if debrief_packed == null:
+		push_error("Main: could not load MissionDebriefUI.tscn")
+		return
+
+	var debrief := debrief_packed.instantiate() as MissionDebriefUI
+	add_child(debrief)
+	debrief.show_debrief(outcome, objectives_list, xp_earned)
 
 func _setup_extraction_zone(graph: FacilityGraph, room_nodes: Array) -> ExtractionZone:
 	if graph.exit_index < 0 or graph.exit_index >= room_nodes.size():
@@ -146,16 +217,14 @@ func _setup_extraction_zone(graph: FacilityGraph, room_nodes: Array) -> Extracti
 
 	var exit_template := exit_node as RoomTemplate
 
-	# Find extraction_zone spawn point; fall back to room centre
 	var zone_pos := exit_template.global_position + Vector3(0.0, 0.1, 0.0)
 	var zone_spawns := exit_template.get_spawn_points("extraction")
 	if not zone_spawns.is_empty():
 		zone_pos = zone_spawns[0].global_position
 
-	# Build the Area3D extraction zone procedurally
 	var zone := ExtractionZone.new()
 	zone.name = "ExtractionZone"
-	zone.total_players = 1  # solo MVP; updated to player_count when networking lands
+	zone.total_players = 1
 
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
@@ -170,40 +239,21 @@ func _setup_extraction_zone(graph: FacilityGraph, room_nodes: Array) -> Extracti
 	return zone
 
 ## Builds a floor plane and four walls for a room based on its AABB half-extents.
-## All geometry is world-positioned using world_transform.origin.
 func _build_room_geometry(template: RoomTemplate, world_transform: Transform3D) -> void:
 	var origin := world_transform.origin
 	var hx := template.aabb_half_extents.x
 	var hz := template.aabb_half_extents.z
 
-	# Floor
 	_add_static_box(
 		origin + Vector3(0.0, -FLOOR_THICKNESS * 0.5, 0.0),
 		Vector3(hx * 2.0, FLOOR_THICKNESS, hz * 2.0),
 		FLOOR_COLOR)
 
-	# Four walls (north, south, east, west) with connector gaps omitted for MVP
 	var wall_y := origin.y + WALL_HEIGHT * 0.5
-	# North wall
-	_add_static_box(
-		Vector3(origin.x, wall_y, origin.z - hz),
-		Vector3(hx * 2.0, WALL_HEIGHT, WALL_THICKNESS),
-		WALL_COLOR)
-	# South wall
-	_add_static_box(
-		Vector3(origin.x, wall_y, origin.z + hz),
-		Vector3(hx * 2.0, WALL_HEIGHT, WALL_THICKNESS),
-		WALL_COLOR)
-	# West wall
-	_add_static_box(
-		Vector3(origin.x - hx, wall_y, origin.z),
-		Vector3(WALL_THICKNESS, WALL_HEIGHT, hz * 2.0),
-		WALL_COLOR)
-	# East wall
-	_add_static_box(
-		Vector3(origin.x + hx, wall_y, origin.z),
-		Vector3(WALL_THICKNESS, WALL_HEIGHT, hz * 2.0),
-		WALL_COLOR)
+	_add_static_box(Vector3(origin.x, wall_y, origin.z - hz), Vector3(hx * 2.0, WALL_HEIGHT, WALL_THICKNESS), WALL_COLOR)
+	_add_static_box(Vector3(origin.x, wall_y, origin.z + hz), Vector3(hx * 2.0, WALL_HEIGHT, WALL_THICKNESS), WALL_COLOR)
+	_add_static_box(Vector3(origin.x - hx, wall_y, origin.z), Vector3(WALL_THICKNESS, WALL_HEIGHT, hz * 2.0), WALL_COLOR)
+	_add_static_box(Vector3(origin.x + hx, wall_y, origin.z), Vector3(WALL_THICKNESS, WALL_HEIGHT, hz * 2.0), WALL_COLOR)
 
 func _spawn_physics_objects(near_pos: Vector3) -> void:
 	_add_physics_box(near_pos + Vector3(-1.5, 0.5,  0.5), Color(0.8, 0.3, 0.3))
@@ -212,14 +262,16 @@ func _spawn_physics_objects(near_pos: Vector3) -> void:
 	_add_physics_sphere(near_pos + Vector3( 1.0, 0.4,  1.5), Color(1.0, 1.0, 1.0))
 	_add_physics_sphere(near_pos + Vector3(-1.0, 0.4, -1.5), Color(0.9, 0.5, 0.1))
 
-func _spawn_player(spawn_pos: Vector3) -> void:
+## Spawns the player and returns the node for signal wiring.
+func _spawn_player(spawn_pos: Vector3) -> CharacterController:
 	var player_scene := load("res://scenes/gameplay/Player.tscn") as PackedScene
 	if player_scene == null:
 		push_error("Main: could not load Player.tscn")
-		return
-	var player := player_scene.instantiate()
+		return null
+	var player := player_scene.instantiate() as CharacterController
 	player.position = spawn_pos
 	add_child(player)
+	return player
 
 # ── Static Helpers ─────────────────────────────────────────────────────────────
 
