@@ -2,7 +2,7 @@
 
 > **Status**: Approved
 > **Created**: 2026-03-25
-> **Last Updated**: 2026-03-25 (Sprint 4 — 18 design docs complete)
+> **Last Updated**: 2026-03-27 (Sprint 5 — Physics Tool System implementation complete)
 > **Source Concept**: design/gdd/game-concept.md
 
 ---
@@ -31,7 +31,7 @@ be validated early via prototype before the rest of the system stack is committe
 | 5 | Networking Layer | Core | MVP | Not Started | — | — |
 | 6 | Character Controller | Core | MVP | Design Complete | [character-controller.md](character-controller.md) | Input System |
 | 7 | Physics Interaction Layer | Core | MVP | Design Complete | [physics-interaction-layer.md](physics-interaction-layer.md) | engine physics |
-| 8 | Physics Tool System | Gameplay | MVP | Design Complete | [physics-tool-system.md](physics-tool-system.md) | Character Controller, Physics Interaction Layer |
+| 8 | Physics Tool System | Gameplay | MVP | Implementation Complete | [physics-tool-system.md](physics-tool-system.md) | Character Controller, Physics Interaction Layer |
 | 9 | Health & Death System | Core | MVP | Design Complete | [health-death-system.md](health-death-system.md) | Character Controller |
 | 10 | Player Spawning & Respawn | Core | MVP | Design Complete | [player-spawning-respawn.md](player-spawning-respawn.md) | Networking Layer, Character Controller |
 | 11 | State Synchronization | Core | MVP | Not Started | — | Networking Layer, all Core systems |

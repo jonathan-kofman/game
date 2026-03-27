@@ -57,10 +57,10 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 > **Read this before starting any session.** Also read `production/session-state/active.md`.
 
-**Active Sprint**: Sprint 5 (Sprint 4 complete as of 2026-03-25)
+**Active Sprint**: Sprint 5 (in progress — 2026-03-27)
 **Milestone**: milestone-01-mvp
 
-### What Is Built (Sprint 3–4)
+### What Is Built (Sprint 3–5)
 
 | System | File(s) | Status |
 |--------|---------|--------|
@@ -74,8 +74,14 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 | EscalationManager | `src/scripts/gameplay/escalation_manager.gd` | Complete |
 | ExtractionZone | `src/scripts/gameplay/extraction_zone.gd` | Complete |
 | Main scene (mission loop wired) | `src/scripts/core/main.gd` | Complete |
+| PhysicsObject base script | `src/scripts/core/physics_object.gd` | Complete |
+| Health & Death System | `src/scripts/core/health_component.gd` | Complete |
+| BaseTool + 3 physics tools | `src/scripts/tools/` (base_tool, gravity_flip, time_slow, force_push) | Complete |
+| ToolManager (wired in Player.tscn) | `src/scripts/tools/tool_manager.gd`, `src/scenes/gameplay/Player.tscn` | Complete |
+| Ramp test scene (Time Slow validation) | `src/scenes/gameplay/RampTestRoom.tscn` | Built — needs playtest |
 
 **Full run loop is code-complete**: `F5 → facility generated → interact terminal → escalation advances → extraction unlocks → channel 4s → run_succeeded`
+**Physics tools complete**: G = gravity flip, T = time slow (hold), F = force push — all wired via ToolManager
 
 ### Design Progress
 
@@ -85,8 +91,8 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 ### Physics Tools Prototype
 
-A physics-tools prototype exists at `prototypes/physics-tools/` — not yet integrated into `src/`.
-Validate here before implementing the Physics Tool System in the main codebase.
+Prototype at `prototypes/physics-tools/` — validated (PROCEED verdict). Production
+implementation is in `src/scripts/tools/`. Prototype is reference-only.
 
 ### Collaboration Mode
 
