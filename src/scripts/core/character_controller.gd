@@ -29,7 +29,7 @@ signal jumped
 # ── Node references ───────────────────────────────────────────────────────────
 
 @onready var camera_mount: Node3D = $CameraMount
-@onready var ray_cast: RayCast3D = $CameraMount/Camera3D/RayCast3D
+@onready var ray_cast: RayCast3D = $CameraMount/CameraController/Camera3D/RayCast3D
 
 # ── Internal state ────────────────────────────────────────────────────────────
 

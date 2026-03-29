@@ -146,6 +146,9 @@ func _setup_facility() -> void:
 	_spawn_physics_objects(entrance_transform.origin)
 
 	var player := _spawn_player(entrance_spawn_pos)
+
+	_setup_enemies_and_hazards(room_nodes, player, escalation)
+
 	if player != null:
 		var health_comp := player.get_node("HealthComponent") as HealthComponent
 		if health_comp != null:
@@ -190,6 +193,37 @@ func _setup_facility() -> void:
 
 	generator.queue_free()
 
+	_setup_kill_zone(entrance_spawn_pos)
+
+# ── Kill Zone (void goo) ───────────────────────────────────────────────────────
+
+var _spawn_pos: Vector3 = Vector3.ZERO
+
+## Large Area3D below the map — kills the player and teleports them back to spawn.
+func _setup_kill_zone(spawn_pos: Vector3) -> void:
+	_spawn_pos = spawn_pos
+
+	var area := Area3D.new()
+	area.name = "KillZone"
+	area.collision_layer = 0
+	area.collision_mask = 4  # player layer
+
+	var col := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2000.0, 2.0, 2000.0)
+	col.shape = shape
+	area.add_child(col)
+	area.position = Vector3(0.0, -30.0, 0.0)
+
+	area.body_entered.connect(_on_kill_zone_entered)
+	add_child(area)
+
+func _on_kill_zone_entered(body: Node3D) -> void:
+	if body is CharacterController:
+		var player := body as CharacterController
+		player.velocity = Vector3.ZERO
+		player.global_position = _spawn_pos
+
 # ── Debrief ────────────────────────────────────────────────────────────────────
 
 ## Computes XP and objective list, then shows the MissionDebriefUI.
@@ -223,7 +257,7 @@ func _setup_extraction_zone(graph: FacilityGraph, room_nodes: Array) -> Extracti
 		push_warning("Main: no exit room in graph; extraction zone not placed.")
 		return null
 
-	var exit_node := room_nodes[graph.exit_index]
+	var exit_node: Node = room_nodes[graph.exit_index]
 	if not (exit_node is RoomTemplate):
 		push_warning("Main: exit room node is not a RoomTemplate.")
 		return null
@@ -245,10 +279,26 @@ func _setup_extraction_zone(graph: FacilityGraph, room_nodes: Array) -> Extracti
 	col.shape = shape
 	zone.add_child(col)
 
-	zone.global_position = zone_pos
-	add_child(zone)
+	# Visible marker — green glowing pillar so the player can locate the zone
+	var mesh_inst := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius    = 1.2
+	mesh.bottom_radius = 1.2
+	mesh.height        = 0.15
+	mesh_inst.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color      = Color(0.0, 1.0, 0.4, 0.8)
+	mat.emission_enabled  = true
+	mat.emission          = Color(0.0, 1.0, 0.4)
+	mat.emission_energy_multiplier = 2.0
+	mat.transparency      = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mesh_inst.set_surface_override_material(0, mat)
+	zone.add_child(mesh_inst)
 
-	print("[Main] ExtractionZone placed at exit room '%s'" % exit_template.room_id)
+	add_child(zone)
+	zone.global_position = zone_pos
+
+	print("[Main] ExtractionZone at %s (exit room '%s')" % [zone_pos, exit_template.room_id])
 	return zone
 
 ## Builds a floor plane and four walls for a room based on its AABB half-extents.
@@ -262,11 +312,8 @@ func _build_room_geometry(template: RoomTemplate, world_transform: Transform3D) 
 		Vector3(hx * 2.0, FLOOR_THICKNESS, hz * 2.0),
 		FLOOR_COLOR)
 
-	var wall_y := origin.y + WALL_HEIGHT * 0.5
-	_add_static_box(Vector3(origin.x, wall_y, origin.z - hz), Vector3(hx * 2.0, WALL_HEIGHT, WALL_THICKNESS), WALL_COLOR)
-	_add_static_box(Vector3(origin.x, wall_y, origin.z + hz), Vector3(hx * 2.0, WALL_HEIGHT, WALL_THICKNESS), WALL_COLOR)
-	_add_static_box(Vector3(origin.x - hx, wall_y, origin.z), Vector3(WALL_THICKNESS, WALL_HEIGHT, hz * 2.0), WALL_COLOR)
-	_add_static_box(Vector3(origin.x + hx, wall_y, origin.z), Vector3(WALL_THICKNESS, WALL_HEIGHT, hz * 2.0), WALL_COLOR)
+	# Walls omitted for playtest — connector-aware door cutting not yet implemented.
+	# Rooms are open-air so the player can walk between all generated rooms.
 
 func _spawn_physics_objects(near_pos: Vector3) -> void:
 	_add_physics_box(near_pos + Vector3(-1.5, 0.5,  0.5), Color(0.8, 0.3, 0.3))
@@ -285,6 +332,56 @@ func _spawn_player(spawn_pos: Vector3) -> CharacterController:
 	player.position = spawn_pos
 	add_child(player)
 	return player
+
+# ── Enemy & Hazard Placement ───────────────────────────────────────────────────
+
+## Scans every room for GuardWaypoint / AlarmLaser / PressurePlate spawn markers
+## and instantiates the corresponding scene at each marker position.
+## Called after the player is in the tree so PatrolGuard.setup() gets a valid ref.
+func _setup_enemies_and_hazards(
+		room_nodes: Array,
+		player: CharacterController,
+		escalation: EscalationManager) -> void:
+
+	var guard_scene := load("res://scenes/gameplay/PatrolGuard.tscn") as PackedScene
+	var laser_scene := load("res://scenes/gameplay/AlarmLaser.tscn") as PackedScene
+	var plate_scene := load("res://scenes/gameplay/PressurePlate.tscn") as PackedScene
+
+	for room_node in room_nodes:
+		if not (room_node is RoomTemplate):
+			continue
+		var template := room_node as RoomTemplate
+
+		# ── Guards ────────────────────────────────────────────────────────────
+		if guard_scene != null:
+			for marker in template.get_spawn_points("guardwaypoint"):
+				var guard := guard_scene.instantiate() as PatrolGuard
+				add_child(guard)
+				guard.global_position = marker.global_position
+				guard.setup(player, escalation)
+				print("[Main] PatrolGuard spawned at %s in room '%s'" \
+					% [marker.global_position, template.room_id])
+
+		# ── Alarm Lasers ──────────────────────────────────────────────────────
+		if laser_scene != null:
+			for marker in template.get_spawn_points("alarmlaser"):
+				var laser := laser_scene.instantiate() as AlarmLaser
+				add_child(laser)
+				laser.global_position = marker.global_position
+				laser.global_rotation = marker.global_rotation
+				laser.setup(escalation)
+				print("[Main] AlarmLaser spawned at %s in room '%s'" \
+					% [marker.global_position, template.room_id])
+
+		# ── Pressure Plates ───────────────────────────────────────────────────
+		if plate_scene != null:
+			for marker in template.get_spawn_points("pressureplate"):
+				var plate := plate_scene.instantiate() as PressurePlate
+				add_child(plate)
+				plate.global_position = marker.global_position
+				plate.setup(escalation)
+				print("[Main] PressurePlate spawned at %s in room '%s'" \
+					% [marker.global_position, template.room_id])
 
 # ── Static Helpers ─────────────────────────────────────────────────────────────
 

@@ -210,7 +210,7 @@ camera.fov  = lerp(camera.fov, target_fov, FOV_LERP_SPEED * delta)
 
 ```
 speed_ratio    = clamp(horizontal_speed / move_speed, 0.0, 1.0)
-_bob_time     += delta * BOB_FREQUENCY * speed_ratio
+_bob_time      = fmod(_bob_time + delta * BOB_FREQUENCY * speed_ratio, 1.0)
 
 bob_y          = sin(_bob_time * TAU) * BOB_AMPLITUDE * speed_ratio
 ```
@@ -267,7 +267,9 @@ _thud_offset_y = lerp(_thud_offset_y, 0.0, THUD_RETURN_SPEED * delta)
 # On trigger (additive accumulation):
 _shake_trauma = min(_shake_trauma + profile.magnitude, SHAKE_MAX_MAGNITUDE)
 
-# Each frame:
+# Decay uses the dominant profile's decay rate (the profile with the highest magnitude
+# that has contributed to _shake_trauma since last reaching zero). If a stronger profile
+# triggers while trauma is active, it takes over as the dominant profile.
 _shake_trauma  = max(0.0, _shake_trauma - profile.decay * delta)
 effective_mag  = _shake_trauma ^ 2
 offset_x       = effective_mag * profile.axis_bias.x * sin(_shake_time * profile.frequency * TAU)

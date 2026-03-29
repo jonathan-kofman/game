@@ -88,11 +88,14 @@ the fix work and the design tasks shift down in priority.
 
 ## Definition of Done for Sprint 7
 
-- [ ] S7-01 through S7-04 (all Must Haves) complete
-- [ ] `production/milestones/milestone-02-vertical-slice.md` exists with 5+ exit criteria
-- [ ] Enemy & Hazard System GDD covers patrol enemy, detection flow, and tool interactions
-- [ ] Sprint 6 retrospective written
-- [ ] ObjectiveManager signal signature corrected in GDD
-- [ ] Code review findings either fixed or logged as tracked tech debt tasks
-- [ ] Audio System GDD written (if Should Have reached)
-- [ ] `design/gdd/systems-index.md` updated to reflect new GDD completions
+- [x] S7-01 through S7-04 (all Must Haves) complete
+- [x] `production/milestones/milestone-02-vertical-slice.md` exists with 5+ exit criteria
+- [x] Enemy & Hazard System GDD covers patrol enemy, detection flow, and tool interactions
+- [ ] Sprint 6 retrospective written  ← pending
+- [x] ObjectiveManager signal signature corrected in GDD
+- [x] Code review findings either fixed or logged as tracked tech debt tasks
+- [x] Audio System GDD written (Should Have reached)
+- [x] Camera System GDD written (S7-07)
+- [x] Camera System implementation complete (S7-08: camera_controller.gd rewritten to trauma model)
+- [x] Risk register refreshed for Vertical Slice phase (S7-10)
+- [x] `design/gdd/systems-index.md` updated to reflect new GDD completions

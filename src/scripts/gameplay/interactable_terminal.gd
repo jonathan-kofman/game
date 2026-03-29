@@ -29,7 +29,7 @@ signal interacted(terminal: InteractableTerminal, interactor: Node)
 
 @export_group("Interaction")
 ## Interaction range in metres. Player must be within this distance to interact.
-@export var interact_range: float = 4.0
+@export var interact_range: float = 8.0
 
 # ── State ─────────────────────────────────────────────────────────────────────
 

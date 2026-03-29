@@ -47,3 +47,12 @@ position = Vector3(0.0, 0.1, 0.0)
 
 [node name="PlayerSpawn_02" type="Marker3D" parent="SpawnPoints"]
 position = Vector3(-2.0, 0.1, 2.0)
+
+[node name="GuardWaypoint_01" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-3.0, 0.1, -2.0)
+
+[node name="GuardWaypoint_02" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(3.0, 0.1, 2.0)
+
+[node name="PressurePlate_01" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(0.0, 0.0, -1.5)

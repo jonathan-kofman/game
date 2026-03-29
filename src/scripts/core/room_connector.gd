@@ -20,7 +20,7 @@ extends Marker3D
 @export var tags: Array[String] = ["door"]
 
 ## True once the generator has connected this connector to another room.
-var is_connected: bool = false
+var is_joined: bool = false
 
 func _ready() -> void:
 	if direction.length_squared() > 0.0:

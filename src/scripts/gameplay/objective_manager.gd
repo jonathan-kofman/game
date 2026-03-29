@@ -77,7 +77,7 @@ func _pick_objective_room(graph: FacilityGraph, room_nodes: Array) -> RoomTempla
 	for i in room_nodes.size():
 		if i == graph.entrance_index or i == graph.exit_index:
 			continue
-		var node := room_nodes[i]
+		var node: Node = room_nodes[i]
 		if node is RoomTemplate:
 			var t := node as RoomTemplate
 			if t.room_type in ["chamber", "hub"]:
@@ -87,7 +87,7 @@ func _pick_objective_room(graph: FacilityGraph, room_nodes: Array) -> RoomTempla
 	for i in room_nodes.size():
 		if i == graph.entrance_index or i == graph.exit_index:
 			continue
-		var node := room_nodes[i]
+		var node: Node = room_nodes[i]
 		if node is RoomTemplate:
 			return node as RoomTemplate
 
@@ -108,8 +108,8 @@ func _place_terminals(room: RoomTemplate) -> void:
 
 		# Place at room centre + small offset per terminal
 		var offset := Vector3(float(i) * 1.5 - (terminals_required - 1) * 0.75, 0.0, 0.0)
-		terminal.global_position = room.global_position + offset + Vector3(0.0, 0.9, 0.0)
 		get_parent().add_child(terminal)
+		terminal.global_position = room.global_position + offset + Vector3(0.0, 0.9, 0.0)
 		terminal.interacted.connect(_on_terminal_interacted)
 
 func _build_terminal_procedurally() -> InteractableTerminal:
@@ -122,6 +122,7 @@ func _build_terminal_procedurally() -> InteractableTerminal:
 	terminal.add_child(col)
 
 	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.name = "MeshInstance3D"
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(0.4, 0.8, 0.2)
 	mesh_inst.mesh = mesh

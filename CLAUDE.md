@@ -57,10 +57,10 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 
 > **Read this before starting any session.** Also read `production/session-state/active.md`.
 
-**Active Sprint**: Sprint 5 (in progress — 2026-03-27)
-**Milestone**: milestone-01-mvp
+**Active Sprint**: Sprint 8 (code-complete — 2026-03-29) — awaiting first manual playtest
+**Milestone**: milestone-01-mvp (4/7 criteria ticked; criteria 5, 6, 7 close on first playtest)
 
-### What Is Built (Sprint 3–5)
+### What Is Built (Sprints 3–8)
 
 | System | File(s) | Status |
 |--------|---------|--------|
@@ -78,10 +78,25 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 | Health & Death System | `src/scripts/core/health_component.gd` | Complete |
 | BaseTool + 3 physics tools | `src/scripts/tools/` (base_tool, gravity_flip, time_slow, force_push) | Complete |
 | ToolManager (wired in Player.tscn) | `src/scripts/tools/tool_manager.gd`, `src/scenes/gameplay/Player.tscn` | Complete |
-| Ramp test scene (Time Slow validation) | `src/scenes/gameplay/RampTestRoom.tscn` | Built — needs playtest |
+| HUD + ToolSelectionUI + MissionDebriefUI | `src/scripts/ui/`, `src/scenes/ui/` | Complete |
+| CameraController (FOV pulse, tilt) | `src/scripts/core/camera_controller.gd` | Complete |
+| PatrolGuard enemy (4-state AI) | `src/scripts/ai/patrol_guard.gd`, `src/scenes/gameplay/PatrolGuard.tscn` | Complete |
+| AlarmLaser hazard | `src/scripts/gameplay/alarm_laser.gd`, `src/scenes/gameplay/AlarmLaser.tscn` | Complete |
+| PressurePlate hazard | `src/scripts/gameplay/pressure_plate.gd`, `src/scenes/gameplay/PressurePlate.tscn` | Complete |
+| Guard/hazard spawn markers in rooms | `src/assets/rooms/chamber/medium_lab_01.tscn`, `medium_storage_01.tscn` | Complete |
+| Enemy & hazard placement (main.gd) | `src/scripts/core/main.gd` `_setup_enemies_and_hazards()` | Complete |
+| AudioManager stub + bus layout | `src/scripts/core/audio_manager.gd` (autoload) | Complete — stubs only |
+| Unit tests (tools + AI) | `src/tests/unit/` | Complete |
 
-**Full run loop is code-complete**: `F5 → facility generated → interact terminal → escalation advances → extraction unlocks → channel 4s → run_succeeded`
-**Physics tools complete**: G = gravity flip, T = time slow (hold), F = force push — all wired via ToolManager
+**Full run loop is code-complete**: `F5 → facility + guards/hazards generated → move → tools → terminal → escalation → extraction → debrief`
+
+**Pending first manual playtest** — see `memory/project_pending_tests.md` for the full checklist before adding more code.
+
+### Tools × Enemy Interactions
+
+- **G (GravityFlipTool)**: flips PhysicsObjects AND stuns PatrolGuard (5 s, tossed up)
+- **T (TimeSlowTool hold)**: slows PhysicsObjects AND slows guards within radius
+- **F (ForcePushTool)**: pushes PhysicsObjects AND stuns PatrolGuard (3 s, lateral slide)
 
 ### Design Progress
 

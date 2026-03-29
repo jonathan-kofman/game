@@ -20,6 +20,7 @@ extends BaseTool
 # ── State ─────────────────────────────────────────────────────────────────────
 
 var _slowed_objects: Array[PhysicsObject] = []
+var _slowed_guards: Array[PatrolGuard] = []
 
 # ── BaseTool interface ────────────────────────────────────────────────────────
 
@@ -67,16 +68,30 @@ func _begin_time_slow() -> void:
 			_slowed_objects.append(obj)
 			obj.apply_time_slow(time_slow_factor, high_damp_value)
 
+	# Also slow PatrolGuard enemies within radius (CharacterBody3D — not in physics layer 2)
+	_slowed_guards.clear()
+	for node in get_tree().get_nodes_in_group("enemies"):
+		if node is PatrolGuard:
+			var guard := node as PatrolGuard
+			if guard.global_position.distance_to(origin) <= radius:
+				_slowed_guards.append(guard)
+				guard.apply_time_slow()
+
 	is_active = true
 	tool_activated.emit(name, null)  # AoE tool — no single target; subscribers must guard null
-	print("[TimeSlowTool] slowing %d objects" % _slowed_objects.size())
+	print("[TimeSlowTool] slowing %d objects, %d guards" % [_slowed_objects.size(), _slowed_guards.size()])
 
 func _end_time_slow() -> void:
 	for obj in _slowed_objects:
 		if is_instance_valid(obj):
 			obj.remove_time_slow()
-
 	_slowed_objects.clear()
+
+	for guard in _slowed_guards:
+		if is_instance_valid(guard):
+			guard.remove_time_slow()
+	_slowed_guards.clear()
+
 	is_active = false
 	tool_deactivated.emit(name)
 	print("[TimeSlowTool] released")

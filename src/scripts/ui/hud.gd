@@ -37,7 +37,7 @@ var _health_tween: Tween = null
 
 ## Wire to HealthComponent.health_changed(new_hp, max_hp).
 func on_health_changed(new_hp: int, max_hp: int) -> void:
-	var fill := clamp(float(new_hp) / float(max(max_hp, 1)), 0.0, 1.0)
+	var fill: float = clamp(float(new_hp) / float(max(max_hp, 1)), 0.0, 1.0)
 	var target_color := Color.GREEN
 	if fill < 0.25:
 		target_color = Color.RED
@@ -67,7 +67,7 @@ func on_escalation_changed(new_level: int, level_name: String) -> void:
 ## Wire to ObjectiveManager.objective_state_changed(objective_id, new_state).
 ## Note: ObjectiveManager currently emits (id, state_string) not (id, name, progress_dict).
 ## Progress counter display is deferred until ObjectiveManager emits richer data.
-func on_objective_state_changed(objective_id: String, new_state: String) -> void:
+func on_objective_state_changed(_objective_id: String, new_state: String) -> void:
 	match new_state:
 		"ACTIVE":
 			_objective_label.text    = "Primary Objective: Activate Terminal"

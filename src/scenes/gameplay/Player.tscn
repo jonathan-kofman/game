@@ -23,13 +23,17 @@ shape = SubResource("CapsuleShape3D_1")
 [node name="CameraMount" type="Node3D" parent="."]
 position = Vector3(0, 1.6, 0)
 
-[node name="Camera3D" type="Camera3D" parent="CameraMount"]
-
+; CameraController sits between CameraMount and Camera3D.
+; CameraMount handles mouse-look (yaw + pitch via CharacterController).
+; CameraController handles feel: headbob, shake, landing thud (own position + rotation).
+; Camera3D inherits both transforms as a child of CameraController.
 [node name="CameraController" type="Node3D" parent="CameraMount"]
 script = ExtResource("7_camera")
 
-[node name="RayCast3D" type="RayCast3D" parent="CameraMount/Camera3D"]
-target_position = Vector3(0, 0, -10)
+[node name="Camera3D" type="Camera3D" parent="CameraMount/CameraController"]
+
+[node name="RayCast3D" type="RayCast3D" parent="CameraMount/CameraController/Camera3D"]
+target_position = Vector3(0, 0, -20)
 enabled = true
 collision_mask = 3
 

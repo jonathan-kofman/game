@@ -2,7 +2,7 @@
 
 > **Status**: Approved
 > **Created**: 2026-03-25
-> **Last Updated**: 2026-03-26 (Sprint 6 — implementation status added)
+> **Last Updated**: 2026-03-27 (Sprint 7 — Enemy/Hazard, Audio, Camera GDDs complete)
 > **Source Concept**: design/gdd/game-concept.md
 
 ---
@@ -39,7 +39,7 @@ be validated early via prototype before the rest of the system stack is committe
 | 13 | Objective System | Gameplay | MVP | ✅ Implemented | [objective-system.md](objective-system.md) | Procedural Generation System |
 | 14 | Escalation System | Gameplay | MVP | ✅ Implemented | [escalation-system.md](escalation-system.md) | Objective System |
 | 15 | Extraction System | Gameplay | MVP | ✅ Implemented | [extraction-system.md](extraction-system.md) | Escalation System |
-| 16 | Enemy & Hazard System | Gameplay | Vertical Slice | Not Started | — | Character Controller, Health & Death System |
+| 16 | Enemy & Hazard System | Gameplay | Vertical Slice | Design Complete | [enemy-hazard-system.md](enemy-hazard-system.md) | Character Controller, Health & Death System |
 | 17 | Resource & Loot System | Economy | Vertical Slice | Not Started | — | Extraction System |
 | 18 | Base Building System | Gameplay | Alpha | Not Started | — | Resource & Loot System, Physics Interaction Layer |
 | 19 | Upgrade & Unlock Tree | Progression | Alpha | Not Started | — | Base Building System |
@@ -48,7 +48,7 @@ be validated early via prototype before the rest of the system stack is committe
 | 22 | Lore Fragment System | Narrative | Alpha | Not Started | — | Room Template Data System |
 | 23 | Environmental Narrative System | Narrative | Alpha | Not Started | — | Room Template Data System, Lore Fragment System |
 | 24 | Mission Debrief System | Gameplay | MVP | ✅ Implemented | [mission-debrief-system.md](mission-debrief-system.md) | Objective System, Resource & Loot System |
-| 25 | Camera System | Core | Vertical Slice | Not Started | — | Character Controller |
+| 25 | Camera System | Core | Vertical Slice | Design Complete | [camera-system.md](camera-system.md) | Character Controller |
 | 26 | Tool Selection UI | UI | MVP | ✅ Implemented | [tool-selection-ui.md](tool-selection-ui.md) | Physics Tool System |
 | 27 | HUD | UI | MVP | ✅ Implemented | [hud.md](hud.md) | Health & Death System, Objective System, Escalation System |
 | 28 | Base Building UI | UI | Alpha | Not Started | — | Base Building System |
@@ -217,7 +217,7 @@ be validated early via prototype before the rest of the system stack is committe
 | Design docs approved | 18 |
 | MVP systems designed | 14 / 16 |
 | MVP systems implemented | 13 / 16 (deferred: Networking Layer, State Sync, Solo/Co-op Scaling) |
-| Vertical Slice systems designed | 1 / 7 |
+| Vertical Slice systems designed | 3 / 7 |
 | Alpha systems designed | 0 / 9 |
 | Full Vision systems designed | 0 / 4 |
 

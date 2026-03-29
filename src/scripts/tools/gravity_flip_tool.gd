@@ -13,10 +13,24 @@ var _flipped_object: PhysicsObject = null
 # ── BaseTool interface ────────────────────────────────────────────────────────
 
 func activate(target: Node, _normal: Vector3) -> void:
+	# PatrolGuard: one-shot stun — no toggle needed
+	if target is PatrolGuard:
+		(target as PatrolGuard).apply_gravity_flip()
+		tool_activated.emit(name, target)
+		return
+
 	var obj := get_physics_object(target)
 
+	# If no target but we have an active flip, G restores it (object may have floated away)
 	if obj == null:
-		_fail("aim at a physics object")
+		if _flipped_object != null and is_instance_valid(_flipped_object):
+			_flipped_object.restore_gravity()
+			_flipped_object = null
+			is_active = false
+			tool_deactivated.emit(name)
+			print("[GravityFlipTool] restored (no target)")
+		else:
+			_fail("aim at a physics object")
 		return
 
 	if obj == _flipped_object:

@@ -33,34 +33,40 @@ extends Node3D
 ## Higher = more likely to be selected when multiple rooms match.
 @export var weight: float = 1.0
 
-# ── Node references ────────────────────────────────────────────────────────────
-
-@onready var _connectors_node: Node = $Connectors
-@onready var _spawn_points_node: Node = $SpawnPoints
-
 # ── Public API ─────────────────────────────────────────────────────────────────
 
 ## Returns all RoomConnector children under the Connectors/ node.
+## Iterates get_children() directly — works on templates not yet in the scene tree,
+## where get_node_or_null() may not resolve relative paths.
 func get_connectors() -> Array[RoomConnector]:
 	var result: Array[RoomConnector] = []
-	if _connectors_node == null:
+	var connectors_node: Node = null
+	for child in get_children():
+		if child.name == &"Connectors":
+			connectors_node = child
+			break
+	if connectors_node == null:
 		push_warning("RoomTemplate '%s': missing Connectors/ child node." % room_id)
 		return result
-	for child in _connectors_node.get_children():
+	for child in connectors_node.get_children():
 		if child is RoomConnector:
 			result.append(child as RoomConnector)
 	return result
 
 ## Returns spawn point Marker3D nodes whose name contains spawn_type (case-insensitive).
 ## Pass "" to return all spawn points.
-## Example: get_spawn_points("player") returns nodes named "PlayerSpawn", "player_01", etc.
 func get_spawn_points(spawn_type: String = "") -> Array[Marker3D]:
 	var result: Array[Marker3D] = []
-	if _spawn_points_node == null:
+	var spawn_points_node: Node = null
+	for child in get_children():
+		if child.name == &"SpawnPoints":
+			spawn_points_node = child
+			break
+	if spawn_points_node == null:
 		push_warning("RoomTemplate '%s': missing SpawnPoints/ child node." % room_id)
 		return result
 	var lower_type := spawn_type.to_lower()
-	for child in _spawn_points_node.get_children():
+	for child in spawn_points_node.get_children():
 		if child is Marker3D:
 			if lower_type == "" or child.name.to_lower().contains(lower_type):
 				result.append(child as Marker3D)

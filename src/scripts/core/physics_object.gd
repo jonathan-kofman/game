@@ -50,7 +50,7 @@ func restore_gravity() -> void:
 func apply_time_slow(slow_factor: float, damp_value: float) -> void:
 	is_time_slowed = true
 	sleeping = false
-	var base_scale := -abs(original_gravity_scale) if is_gravity_flipped else original_gravity_scale
+	var base_scale: float = -abs(original_gravity_scale) if is_gravity_flipped else original_gravity_scale
 	gravity_scale = base_scale * slow_factor
 	linear_damp = damp_value
 	physics_state_changed.emit(self)

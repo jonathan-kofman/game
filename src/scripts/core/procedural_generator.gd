@@ -22,7 +22,7 @@ extends Node
 const MIN_ROOMS: int = 8
 const MAX_ROOMS: int = 16
 const MAX_ATTEMPTS: int = 10
-const AABB_PADDING: float = 0.5
+const AABB_PADDING: float = 0.0
 
 ## Fraction of MAX_ROOMS after which an exit room is eligible.
 const MIN_EXIT_AFTER: float = 0.5
@@ -199,7 +199,7 @@ func _find_compatible(template: RoomTemplate, open_connector: RoomConnector) -> 
 ##   • Translate so the connector positions coincide.
 func _compute_alignment(open_connector: RoomConnector,
 		join_connector: RoomConnector,
-		template: RoomTemplate) -> Transform3D:
+		_template: RoomTemplate) -> Transform3D:
 
 	# Direction the open connector is pointing (world space = local space for our
 	# axis-aligned rooms; no rotation on placed rooms yet at MVP).
@@ -249,7 +249,7 @@ func _overlaps_any(template: RoomTemplate, world_transform: Transform3D) -> bool
 func _push_connectors(template: RoomTemplate, world_transform: Transform3D,
 		room_index: int) -> void:
 	for connector in template.get_connectors():
-		if not connector.is_connected:
+		if not connector.is_joined:
 			# Temporarily set global_position for use in _compute_alignment later.
 			# Since template is not in the scene tree, we store world position in a
 			# helper by applying the transform to the connector's local position.

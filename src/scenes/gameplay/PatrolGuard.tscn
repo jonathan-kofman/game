@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4vj4r0k2y5ma"]
+
+[ext_resource type="Script" path="res://scripts/ai/patrol_guard.gd" id="1_patrol"]
+
+[node name="PatrolGuard" type="CharacterBody3D"]
+script = ExtResource("1_patrol")

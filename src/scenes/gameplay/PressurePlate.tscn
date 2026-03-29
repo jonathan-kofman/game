@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://pressureplate01vs"]
+
+[ext_resource type="Script" path="res://scripts/gameplay/pressure_plate.gd" id="1_plate"]
+
+[node name="PressurePlate" type="StaticBody3D"]
+script = ExtResource("1_plate")

@@ -76,6 +76,14 @@ func on_enemy_alerted() -> void:
 func on_camera_detected() -> void:
 	_add_pressure(camera_detect_pressure, "camera detection")
 
+## Called by AlarmLaser or PressurePlate alarm when triggered. GDD §3.5: +60 pressure.
+func on_alarm_triggered(source: String = "alarm") -> void:
+	_add_pressure(camera_detect_pressure, source)  # camera_detect_pressure = 60 — same budget
+
+## Called by PressurePlate on initial activation (not yet alarm). GDD §3.5: +40 pressure.
+func on_hazard_tripped(source: String = "hazard") -> void:
+	_add_pressure(enemy_alert_pressure, source)  # enemy_alert_pressure = 40 — same budget
+
 ## Returns the current level as a human-readable string.
 func level_name() -> String:
 	return Level.keys()[current_level]
